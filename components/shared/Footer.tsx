@@ -48,13 +48,21 @@ export default function Footer() {
               Servizi
             </h4>
             <ul className="space-y-3">
-              {["Vendita Auto", "Finanziamento", "Permuta", "Test Drive"].map(
-                (item) => (
-                  <li key={item}>
-                    <span className="text-sm text-text-muted">{item}</span>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Vendita Auto", href: "/servizi/vendita" },
+                { label: "Finanziamento", href: "/servizi/finanziamento" },
+                { label: "Permuta", href: "/servizi/permuta" },
+                { label: "Test Drive", href: "/servizi/test-drive" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-text-muted hover:text-accent transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
