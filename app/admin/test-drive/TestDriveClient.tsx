@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { TestDrive, Car } from "@/lib/types";
-import { formatTime, cn } from "@/lib/utils";
+import { formatTime, formatDate, cn } from "@/lib/utils";
 import { Badge, Button, SlideOver, Input, Select, Textarea, Toast } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, List, Calendar as CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { testDriveSchema, TestDriveFormData } from "@/lib/validations";
@@ -40,12 +40,18 @@ function formatDateStr(date: Date): string {
 
 export default function TestDriveClient({ initialTestDrives, cars }: TestDriveClientProps) {
   const [testDrives, setTestDrives] = useState(initialTestDrives);
+  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [weekOffset, setWeekOffset] = useState(0);
   const [slideOpen, setSlideOpen] = useState(false);
   const [selectedTD, setSelectedTD] = useState<TestDrive | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info"; visible: boolean }>({ message: "", type: "info", visible: false });
   const router = useRouter();
+
+  // Fix: Sync state when server data changes
+  useEffect(() => {
+    setTestDrives(initialTestDrives);
+  }, [initialTestDrives]);
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type, visible: true });
@@ -89,98 +95,185 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
     }
   };
 
+  const updateStatus = async (id: string, newStatus: string) => {
+    const supabase = createClient();
+    const { error } = await supabase.from("test_drives").update({ stato: newStatus }).eq("id", id);
+    if (!error) {
+      showToast(`Stato aggiornato a ${newStatus}`);
+      router.refresh();
+      setSlideOpen(false);
+    } else {
+      showToast("Errore nell'aggiornamento", "error");
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-text font-display">Test Drive</h1>
-          <p className="text-sm text-text-muted">Calendario settimanale</p>
+          <p className="text-sm text-text-muted">Gestione appuntamenti</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Nuovo Test Drive
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-surface-2 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("calendar")}
+              className={cn("p-2 rounded-md transition-colors", viewMode === "calendar" ? "bg-surface text-text shadow" : "text-text-muted hover:text-text")}
+            >
+              <CalendarIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn("p-2 rounded-md transition-colors", viewMode === "list" ? "bg-surface text-text shadow" : "text-text-muted hover:text-text")}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+          <Button onClick={() => setShowForm(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nuovo
+          </Button>
+        </div>
       </div>
 
-      {/* Week navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => setWeekOffset((w) => w - 1)}
-          className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <span className="text-sm font-medium text-text">
-          {formatDayLabel(weekDays[0])} – {formatDayLabel(weekDays[6])}
-        </span>
-        <button
-          onClick={() => setWeekOffset((w) => w + 1)}
-          className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
-        <div className="min-w-[700px]">
-          {/* Header */}
-          <div className="grid grid-cols-8 border-b border-white/[.08]">
-            <div className="px-3 py-3 text-xs text-text-faint font-medium">Ora</div>
-            {weekDays.map((day) => (
-              <div
-                key={day.toISOString()}
-                className={cn(
-                  "px-3 py-3 text-xs font-medium text-center border-l border-white/[.08]",
-                  formatDateStr(day) === formatDateStr(new Date())
-                    ? "text-accent bg-accent/5"
-                    : "text-text-muted"
-                )}
-              >
-                {formatDayLabel(day)}
-              </div>
-            ))}
+      {viewMode === "calendar" ? (
+        <>
+          {/* Week navigation */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setWeekOffset((w) => w - 1)}
+              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-medium text-text">
+              {formatDayLabel(weekDays[0])} – {formatDayLabel(weekDays[6])}
+            </span>
+            <button
+              onClick={() => setWeekOffset((w) => w + 1)}
+              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Rows */}
-          {TIME_SLOTS.map((time) => (
-            <div key={time} className="grid grid-cols-8 border-b border-white/[.08] last:border-0">
-              <div className="px-3 py-3 text-xs text-text-faint flex items-start">
-                {time}
-              </div>
-              {weekDays.map((day) => {
-                const events = getEventsForSlot(day, time);
-                return (
+          {/* Calendar grid */}
+          <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
+            <div className="min-w-[700px]">
+              {/* Header */}
+              <div className="grid grid-cols-8 border-b border-white/[.08]">
+                <div className="px-3 py-3 text-xs text-text-faint font-medium">Ora</div>
+                {weekDays.map((day) => (
                   <div
                     key={day.toISOString()}
-                    className="px-1 py-1 border-l border-white/[.08] min-h-[52px]"
+                    className={cn(
+                      "px-3 py-3 text-xs font-medium text-center border-l border-white/[.08]",
+                      formatDateStr(day) === formatDateStr(new Date())
+                        ? "text-accent bg-accent/5"
+                        : "text-text-muted"
+                    )}
                   >
-                    {events.map((ev) => (
-                      <button
-                        key={ev.id}
-                        onClick={() => {
-                          setSelectedTD(ev);
-                          setSlideOpen(true);
-                        }}
-                        className={cn(
-                          "w-full text-left px-2 py-1 rounded text-xs font-medium truncate",
-                          ev.stato === "Confermato"
-                            ? "bg-accent/15 text-accent"
-                            : ev.stato === "Completato"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-red-500/15 text-red-400"
-                        )}
-                      >
-                        {ev.nome_cliente.split(" ")[0]}
-                      </button>
-                    ))}
+                    {formatDayLabel(day)}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Rows */}
+              {TIME_SLOTS.map((time) => (
+                <div key={time} className="grid grid-cols-8 border-b border-white/[.08] last:border-0">
+                  <div className="px-3 py-3 text-xs text-text-faint flex items-start">
+                    {time}
+                  </div>
+                  {weekDays.map((day) => {
+                    const events = getEventsForSlot(day, time);
+                    return (
+                      <div
+                        key={day.toISOString()}
+                        className="px-1 py-1 border-l border-white/[.08] min-h-[52px]"
+                      >
+                        {events.map((ev) => (
+                          <button
+                            key={ev.id}
+                            onClick={() => {
+                              setSelectedTD(ev);
+                              setSlideOpen(true);
+                            }}
+                            className={cn(
+                              "w-full text-left px-2 py-1 rounded text-xs font-medium truncate mb-1",
+                              ev.stato === "Confermato"
+                                ? "bg-accent/15 text-accent"
+                                : ev.stato === "Completato"
+                                ? "bg-emerald-500/15 text-emerald-400"
+                                : "bg-red-500/15 text-red-400"
+                            )}
+                          >
+                            {ev.nome_cliente.split(" ")[0]}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </>
+      ) : (
+        /* List View */
+        <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/[.08]">
+                <th className="text-left px-4 py-3 text-text-muted font-medium">Data & Ora</th>
+                <th className="text-left px-4 py-3 text-text-muted font-medium">Cliente</th>
+                <th className="text-left px-4 py-3 text-text-muted font-medium">Auto</th>
+                <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[.08]">
+              {testDrives.map((td) => (
+                <tr
+                  key={td.id}
+                  onClick={() => { setSelectedTD(td); setSlideOpen(true); }}
+                  className="hover:bg-surface-2 transition-colors cursor-pointer"
+                >
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-text">{formatDate(td.data_appuntamento)}</p>
+                    <p className="text-xs text-text-faint">{formatTime(td.ora_inizio)} - {formatTime(td.ora_fine)}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-text">{td.nome_cliente}</p>
+                    <p className="text-xs text-text-faint">{td.telefono_cliente || td.email_cliente}</p>
+                  </td>
+                  <td className="px-4 py-3 text-text-muted">
+                    {td.car ? `${td.car.marca} ${td.car.modello}` : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge
+                      variant={
+                        td.stato === "Confermato"
+                          ? "accent"
+                          : td.stato === "Completato"
+                          ? "success"
+                          : "danger"
+                      }
+                    >
+                      {td.stato}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+              {testDrives.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-text-muted">
+                    Nessun test drive registrato.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
 
       {/* Detail overlay */}
       <SlideOver
@@ -207,7 +300,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
               )}
               <div className="flex justify-between">
                 <span className="text-sm text-text-muted">Data</span>
-                <span className="text-sm text-text">{selectedTD.data_appuntamento}</span>
+                <span className="text-sm text-text">{formatDate(selectedTD.data_appuntamento)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-text-muted">Orario</span>
@@ -221,7 +314,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
                   {selectedTD.car ? `${selectedTD.car.marca} ${selectedTD.car.modello}` : "—"}
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-sm text-text-muted">Stato</span>
                 <Badge
                   variant={
@@ -236,12 +329,29 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
                 </Badge>
               </div>
             </div>
+
             {selectedTD.note && (
               <div>
                 <p className="text-sm text-text-muted mb-1">Note:</p>
                 <p className="text-sm text-text bg-surface-2 rounded-lg p-3">{selectedTD.note}</p>
               </div>
             )}
+
+            <div className="space-y-3 pt-4 border-t border-white/[.08]">
+              <h3 className="text-sm font-semibold text-text uppercase tracking-wider">Aggiorna Stato</h3>
+              <div className="flex gap-2">
+                {["Confermato", "Completato", "Cancellato"].map((s) => (
+                  <Button
+                    key={s}
+                    variant={selectedTD.stato === s ? "primary" : "secondary"}
+                    size="sm"
+                    onClick={() => updateStatus(selectedTD.id, s)}
+                  >
+                    {s}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </SlideOver>

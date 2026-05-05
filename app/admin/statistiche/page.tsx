@@ -7,19 +7,23 @@ export default async function StatistichePage() {
   // Leads per month (last 6 months)
   const { data: allLeads } = await supabase
     .from("leads")
-    .select("created_at, tipo")
+    .select("created_at, tipo, stato")
     .order("created_at", { ascending: true });
 
-  // Cars sold per brand
   const { data: soldCars } = await supabase
     .from("cars")
     .select("marca")
     .eq("stato", "Venduta");
 
+  const { data: testDrives } = await supabase
+    .from("test_drives")
+    .select("stato, data_appuntamento");
+
   return (
     <StatisticheClient
       allLeads={allLeads || []}
       soldCars={soldCars || []}
+      testDrives={testDrives || []}
     />
   );
 }
