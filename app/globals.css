@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://api.fontshare.com/v2/css?f[]=boska@400,500,700&f[]=general-sans@400,500,600,700&display=swap');
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0A0A0B;
+    color: #F0F0F0;
+    font-family: 'General Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(0, 212, 255, 0.3);
+    color: #F0F0F0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0A0A0B;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(17, 17, 19, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #F0F0F0 0%, #00D4FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-accent text-bg font-semibold rounded-lg transition-all duration-200 hover:brightness-110 hover:shadow-lg hover:shadow-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: 44px;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-surface border border-white/10 text-text font-medium rounded-lg transition-all duration-200 hover:bg-surface-2 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg;
+    min-height: 44px;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-text-muted font-medium rounded-lg transition-all duration-200 hover:bg-surface hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent;
+    min-height: 44px;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-2 border border-white/10 rounded-lg text-text placeholder:text-text-faint transition-all duration-200 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30;
+    min-height: 44px;
+  }
+
+  .surface-card {
+    @apply bg-surface border border-white/[.08] rounded-xl;
+  }
+
+  .surface-card-hover {
+    @apply surface-card transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 hover:border-white/[.12];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Staggered fade-up animation for grid children */
+.stagger-grid > * {
+  opacity: 0;
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+.stagger-grid > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-grid > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-grid > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-grid > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-grid > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-grid > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-grid > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-grid > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-grid > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-grid > *:nth-child(10) { animation-delay: 0.5s; }
+.stagger-grid > *:nth-child(11) { animation-delay: 0.55s; }
+.stagger-grid > *:nth-child(12) { animation-delay: 0.6s; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-grid > * {
+    animation: none;
+    opacity: 1;
+  }
+}
