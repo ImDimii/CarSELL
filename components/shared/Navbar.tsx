@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Heart, Menu, X, Car } from "lucide-react";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,6 +10,22 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { items, setOpen } = useWishlistStore();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   const links = [
     { href: "/", label: "Home" },
