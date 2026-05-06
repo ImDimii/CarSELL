@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFilterStore } from "@/store/useFilterStore";
-import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const MARCHE = [
   "Ferrari", "Lamborghini", "Porsche", "BMW", "Mercedes",
@@ -11,6 +12,88 @@ const MARCHE = [
 
 const CARBURANTI = ["Benzina", "Diesel", "Ibrido", "Elettrico"];
 const TRASMISSIONI = ["Automatico", "Manuale"];
+
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  options: string[];
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between bg-surface/50 border border-white/[.08] rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-accent appearance-none cursor-pointer transition-colors"
+      >
+        <span className={value ? "text-text" : "text-text-muted"}>
+          {value || placeholder}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-text-muted transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute z-50 w-full mt-2 bg-surface border border-white/[.08] rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-text-muted hover:bg-white/5 transition-colors"
+            >
+              Tutti / {placeholder}
+            </button>
+            {options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt);
+                  setOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${
+                  value === opt ? "text-accent bg-accent/10 font-medium" : "text-text"
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function FilterBar() {
   const { filters, setFilter, resetFilters } = useFilterStore();
@@ -51,38 +134,26 @@ export default function FilterBar() {
       >
         {/* Row 1: Selects & Years */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <select
+          <CustomSelect
             value={filters.marca || ""}
-            onChange={(e) => setFilter("marca", e.target.value || undefined)}
-            className="w-full bg-surface/50 border border-white/[.08] rounded-xl px-4 py-3.5 text-sm text-text focus:outline-none focus:border-accent appearance-none cursor-pointer"
-          >
-            <option value="">Tutte le marche</option>
-            {MARCHE.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilter("marca", val || undefined)}
+            options={MARCHE}
+            placeholder="Marca"
+          />
 
-          <select
+          <CustomSelect
             value={filters.carburante || ""}
-            onChange={(e) => setFilter("carburante", (e.target.value as any) || undefined)}
-            className="w-full bg-surface/50 border border-white/[.08] rounded-xl px-4 py-3.5 text-sm text-text focus:outline-none focus:border-accent appearance-none cursor-pointer"
-          >
-            <option value="">Carburante</option>
-            {CARBURANTI.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilter("carburante", (val as any) || undefined)}
+            options={CARBURANTI}
+            placeholder="Carburante"
+          />
 
-          <select
+          <CustomSelect
             value={filters.trasmissione || ""}
-            onChange={(e) => setFilter("trasmissione", (e.target.value as any) || undefined)}
-            className="w-full bg-surface/50 border border-white/[.08] rounded-xl px-4 py-3.5 text-sm text-text focus:outline-none focus:border-accent appearance-none cursor-pointer"
-          >
-            <option value="">Trasmissione</option>
-            {TRASMISSIONI.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilter("trasmissione", (val as any) || undefined)}
+            options={TRASMISSIONI}
+            placeholder="Trasmissione"
+          />
 
           <div className="flex gap-2">
             <input
