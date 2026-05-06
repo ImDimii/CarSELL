@@ -138,36 +138,40 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
 
       {viewMode === "calendar" ? (
         <>
+      {viewMode === "calendar" ? (
+        <>
           {/* Week navigation */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setWeekOffset((w) => w - 1)}
-              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
+              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all active:scale-95"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <span className="text-sm font-medium text-text">
-              {formatDayLabel(weekDays[0])} – {formatDayLabel(weekDays[6])}
-            </span>
+            <div className="text-center">
+              <span className="block text-sm font-bold text-text uppercase tracking-tight">Settimana</span>
+              <span className="text-xs text-text-muted">
+                {formatDayLabel(weekDays[0])} – {formatDayLabel(weekDays[6])}
+              </span>
+            </div>
             <button
               onClick={() => setWeekOffset((w) => w + 1)}
-              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all"
+              className="p-2 rounded-lg bg-surface border border-white/10 text-text-muted hover:text-text transition-all active:scale-95"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Calendar grid */}
-          <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
-            <div className="min-w-[700px]">
-              {/* Header */}
+          {/* Desktop Calendar Grid */}
+          <div className="hidden lg:block surface-card rounded-xl overflow-hidden">
+            <div className="w-full">
               <div className="grid grid-cols-8 border-b border-white/[.08]">
-                <div className="px-3 py-3 text-xs text-text-faint font-medium">Ora</div>
+                <div className="px-3 py-4 text-xs text-text-faint font-medium">Ora</div>
                 {weekDays.map((day) => (
                   <div
                     key={day.toISOString()}
                     className={cn(
-                      "px-3 py-3 text-xs font-medium text-center border-l border-white/[.08]",
+                      "px-3 py-4 text-xs font-bold text-center border-l border-white/[.08]",
                       formatDateStr(day) === formatDateStr(new Date())
                         ? "text-accent bg-accent/5"
                         : "text-text-muted"
@@ -178,10 +182,9 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
                 ))}
               </div>
 
-              {/* Rows */}
               {TIME_SLOTS.map((time) => (
                 <div key={time} className="grid grid-cols-8 border-b border-white/[.08] last:border-0">
-                  <div className="px-3 py-3 text-xs text-text-faint flex items-start">
+                  <div className="px-3 py-4 text-xs text-text-faint flex items-start">
                     {time}
                   </div>
                   {weekDays.map((day) => {
@@ -189,7 +192,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
                     return (
                       <div
                         key={day.toISOString()}
-                        className="px-1 py-1 border-l border-white/[.08] min-h-[52px]"
+                        className="px-1 py-1 border-l border-white/[.08] min-h-[64px]"
                       >
                         {events.map((ev) => (
                           <button
@@ -199,12 +202,12 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
                               setSlideOpen(true);
                             }}
                             className={cn(
-                              "w-full text-left px-2 py-1 rounded text-xs font-medium truncate mb-1",
+                              "w-full text-left px-2 py-1.5 rounded text-[10px] font-semibold truncate mb-1 border transition-colors",
                               ev.stato === "Confermato"
-                                ? "bg-accent/15 text-accent"
+                                ? "bg-accent/10 text-accent border-accent/20 hover:bg-accent/20"
                                 : ev.stato === "Completato"
-                                ? "bg-emerald-500/15 text-emerald-400"
-                                : "bg-red-500/15 text-red-400"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
                             )}
                           >
                             {ev.nome_cliente.split(" ")[0]}
@@ -217,12 +220,82 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
               ))}
             </div>
           </div>
+
+          {/* Mobile Calendar (Vertical List) */}
+          <div className="lg:hidden space-y-6">
+            {weekDays.map((day) => {
+              const dateStr = formatDateStr(day);
+              const dayEvents = testDrives.filter(td => td.data_appuntamento === dateStr);
+              const isToday = dateStr === formatDateStr(new Date());
+              
+              if (dayEvents.length === 0 && !isToday) return null;
+
+              return (
+                <div key={day.toISOString()} className="space-y-3">
+                  <div className={cn(
+                    "flex items-center gap-2 px-1",
+                    isToday ? "text-accent" : "text-text-muted"
+                  )}>
+                    <span className="text-sm font-bold uppercase">{formatDayLabel(day)}</span>
+                    {isToday && <Badge variant="accent" className="text-[10px] py-0 px-1.5">Oggi</Badge>}
+                    <div className="h-px flex-1 bg-white/5 ml-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {dayEvents.length > 0 ? (
+                      dayEvents.sort((a, b) => a.ora_inizio.localeCompare(b.ora_inizio)).map((ev) => (
+                        <div
+                          key={ev.id}
+                          onClick={() => {
+                            setSelectedTD(ev);
+                            setSlideOpen(true);
+                          }}
+                          className="surface-card p-4 rounded-xl flex items-center justify-between active:bg-surface-2 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="text-center min-w-[50px]">
+                              <p className="text-sm font-bold text-text">{formatTime(ev.ora_inizio)}</p>
+                              <p className="text-[10px] text-text-faint">{formatTime(ev.ora_fine)}</p>
+                            </div>
+                            <div className="w-px h-8 bg-white/10" />
+                            <div>
+                              <p className="text-sm font-bold text-text">{ev.nome_cliente}</p>
+                              <p className="text-xs text-text-muted">{ev.car?.marca} {ev.car?.modello}</p>
+                            </div>
+                          </div>
+                          <Badge
+                            variant={
+                              ev.stato === "Confermato" ? "accent" : 
+                              ev.stato === "Completato" ? "success" : "danger"
+                            }
+                            className="scale-90"
+                          >
+                            {ev.stato}
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-text-faint px-1 italic">Nessun appuntamento</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {weekDays.every(day => testDrives.filter(td => td.data_appuntamento === formatDateStr(day)).length === 0) && (
+              <div className="surface-card p-12 rounded-xl text-center">
+                <CalendarIcon className="w-10 h-10 text-text-faint mx-auto mb-3 opacity-20" />
+                <p className="text-sm text-text-muted">Nessun appuntamento per questa settimana</p>
+              </div>
+            )}
+          </div>
+        </>
         </>
       ) : (
         /* List View */
         <div className="space-y-4">
           {/* Desktop View */}
-          <div className="hidden sm:block surface-card rounded-xl overflow-hidden overflow-x-auto">
+          <div className="hidden lg:block surface-card rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/[.08]">
@@ -270,7 +343,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
           </div>
 
           {/* Mobile View */}
-          <div className="sm:hidden space-y-3">
+          <div className="lg:hidden space-y-3">
             {testDrives.map((td) => (
               <div
                 key={td.id}

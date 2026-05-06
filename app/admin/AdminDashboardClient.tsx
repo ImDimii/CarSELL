@@ -71,15 +71,15 @@ export default function AdminDashboardClient({
                 key={lead.id}
                 className="px-5 py-3.5 flex items-center justify-between hover:bg-surface-2 transition-colors"
               >
-                <div>
-                  <p className="text-sm font-medium text-text">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text truncate">
                     {lead.nome} {lead.cognome}
                   </p>
-                  <p className="text-xs text-text-muted">
+                  <p className="text-xs text-text-muted truncate">
                     {lead.car?.marca} {lead.car?.modello} · {lead.tipo}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   <Badge
                     variant={
                       lead.stato === "Nuovo"
@@ -88,10 +88,11 @@ export default function AdminDashboardClient({
                         ? "warning"
                         : "success"
                     }
+                    className="scale-90 sm:scale-100"
                   >
                     {lead.stato}
                   </Badge>
-                  <span className="text-xs text-text-faint">
+                  <span className="text-[10px] sm:text-xs text-text-faint whitespace-nowrap">
                     {formatDate(lead.created_at)}
                   </span>
                 </div>

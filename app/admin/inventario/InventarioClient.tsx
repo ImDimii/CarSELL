@@ -187,7 +187,7 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden sm:block surface-card rounded-xl overflow-hidden overflow-x-auto">
+      <div className="hidden lg:block surface-card rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/[.08]">
@@ -261,7 +261,7 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
       </div>
 
       {/* Mobile Card View */}
-      <div className="sm:hidden space-y-4">
+      <div className="lg:hidden space-y-4">
         {filtered.map((car) => (
           <div key={car.id} className="surface-card p-4 rounded-xl space-y-4">
             <div className="flex gap-4">
