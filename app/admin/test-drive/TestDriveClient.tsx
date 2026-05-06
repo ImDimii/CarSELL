@@ -108,8 +108,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
   };
 
   return (
-    <>
-      <div>
+    <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-text font-display">Test Drive</h1>
@@ -138,7 +137,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
       </div>
 
       {viewMode === "calendar" ? (
-        <>
+        <div className="space-y-6">
           {/* Week navigation */}
           <div className="flex items-center justify-between mb-6">
             <button
@@ -288,8 +287,7 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
               </div>
             )}
           </div>
-        </>
-        </>
+        </div>
       ) : (
         /* List View */
         <div className="space-y-4">
@@ -528,6 +526,5 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
         onClose={() => setToast((t) => ({ ...t, visible: false }))}
       />
     </div>
-    </>
   );
 }
