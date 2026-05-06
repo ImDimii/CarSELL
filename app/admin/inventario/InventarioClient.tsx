@@ -186,100 +186,26 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
         </select>
       </div>
 
-      {/* Desktop Table View */}
-      <div className="hidden lg:block surface-card rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[.08]">
-              <th className="text-left px-4 py-3 text-text-muted font-medium">Auto</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden lg:table-cell">Anno</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium">Prezzo</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden md:table-cell">Km</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
-              <th className="text-right px-4 py-3 text-text-muted font-medium">Azioni</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/8">
-            {filtered.map((car) => (
-              <tr key={car.id} className="hover:bg-surface-2 transition-colors">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-8 rounded overflow-hidden flex-shrink-0">
-                      <Image
-                        src={getCarImageUrl(car.foto)}
-                        alt={car.modello}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-text">{car.marca} {car.modello}</p>
-                      <p className="text-xs text-text-faint">{car.carburante}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-text-muted hidden lg:table-cell">{car.anno}</td>
-                <td className="px-4 py-3 text-accent font-medium">{formatPrice(car.prezzo)}</td>
-                <td className="px-4 py-3 text-text-muted hidden md:table-cell">
-                  {formatNumber(car.km)}
-                </td>
-                <td className="px-4 py-3">
-                  <button onClick={() => handleStatusToggle(car)}>
-                    <Badge
-                      variant={
-                        car.stato === "Disponibile"
-                          ? "success"
-                          : car.stato === "Riservata"
-                          ? "warning"
-                          : "danger"
-                      }
-                    >
-                      {car.stato}
-                    </Badge>
-                  </button>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => openEdit(car)}
-                      className="p-2 rounded-lg text-text-muted hover:text-accent hover:bg-accent/10 transition-all"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(car.id)}
-                      className="p-2 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="lg:hidden space-y-4">
+      {/* Grid of Cards (Both Desktop & Mobile) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
         {filtered.map((car) => (
-          <div key={car.id} className="surface-card p-4 rounded-xl space-y-4">
+          <div key={car.id} className="surface-card p-4 rounded-xl space-y-4 hover:border-accent/30 transition-all group">
             <div className="flex gap-4">
-              <div className="relative w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="relative w-28 h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-lg shadow-black/20">
                 <Image
                   src={getCarImageUrl(car.foto)}
                   alt={car.modello}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-bold text-text truncate">{car.marca} {car.modello}</p>
-                    <p className="text-xs text-text-muted">{car.anno} • {car.carburante}</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div className="min-w-0">
+                    <p className="font-bold text-text truncate text-base lg:text-lg">{car.marca} {car.modello}</p>
+                    <p className="text-xs text-text-muted">{car.anno} • {car.carburante} • {car.trasmissione}</p>
                   </div>
-                  <button onClick={() => handleStatusToggle(car)}>
+                  <button onClick={() => handleStatusToggle(car)} className="flex-shrink-0">
                     <Badge
                       variant={
                         car.stato === "Disponibile"
@@ -288,33 +214,34 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
                           ? "warning"
                           : "danger"
                       }
+                      className="text-[10px] uppercase tracking-wider"
                     >
                       {car.stato}
                     </Badge>
                   </button>
                 </div>
-                <p className="text-accent font-semibold mt-1">{formatPrice(car.prezzo)}</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-accent font-bold text-lg">{formatPrice(car.prezzo)}</span>
+                  <span className="text-[10px] text-text-faint">{formatNumber(car.km)} km</span>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between pt-3 border-t border-white/5">
-              <span className="text-xs text-text-faint">{formatNumber(car.km)} km</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => openEdit(car)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-2 text-text-muted text-xs font-medium"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  Modifica
-                </button>
-                <button
-                  onClick={() => handleDelete(car.id)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-medium"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Elimina
-                </button>
-              </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => openEdit(car)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-2 text-text-muted text-xs font-semibold hover:text-accent hover:bg-accent/10 transition-all"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Modifica
+              </button>
+              <button
+                onClick={() => handleDelete(car.id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/5 text-red-400/70 text-xs font-semibold hover:bg-red-500/10 hover:text-red-400 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Elimina
+              </button>
             </div>
           </div>
         ))}

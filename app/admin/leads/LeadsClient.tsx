@@ -89,55 +89,52 @@ export default function LeadsClient({ initialLeads }: LeadsClientProps) {
         />
       </div>
 
-      {/* Table */}
-      <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[.08]">
-              <th className="text-left px-4 py-3 text-text-muted font-medium">Cliente</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden sm:table-cell">Auto</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden md:table-cell">Tipo</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden lg:table-cell">Data</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/8">
-            {filtered.map((lead) => (
-              <tr
-                key={lead.id}
-                onClick={() => openDetail(lead)}
-                className="hover:bg-surface-2 transition-colors cursor-pointer"
+      {/* Grid of Leads (Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+        {filtered.map((lead) => (
+          <div
+            key={lead.id}
+            onClick={() => openDetail(lead)}
+            className="surface-card p-5 rounded-xl space-y-4 hover:border-accent/30 transition-all cursor-pointer group active:scale-[0.98]"
+          >
+            <div className="flex justify-between items-start gap-4">
+              <div className="min-w-0">
+                <p className="font-bold text-text truncate text-lg">
+                  {lead.nome} {lead.cognome}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-text-faint mt-0.5">
+                  <Mail className="w-3 h-3" />
+                  <span className="truncate">{lead.email}</span>
+                </div>
+              </div>
+              <Badge
+                variant={
+                  lead.stato === "Nuovo"
+                    ? "accent"
+                    : lead.stato === "In lavorazione"
+                    ? "warning"
+                    : "success"
+                }
+                className="text-[10px] uppercase tracking-wider"
               >
-                <td className="px-4 py-3">
-                  <p className="font-medium text-text">{lead.nome} {lead.cognome}</p>
-                  <p className="text-xs text-text-faint">{lead.email}</p>
-                </td>
-                <td className="px-4 py-3 text-text-muted hidden sm:table-cell">
-                  {lead.car ? `${lead.car.marca} ${lead.car.modello}` : "—"}
-                </td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  <Badge variant="accent">{lead.tipo}</Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <Badge
-                    variant={
-                      lead.stato === "Nuovo"
-                        ? "accent"
-                        : lead.stato === "In lavorazione"
-                        ? "warning"
-                        : "success"
-                    }
-                  >
-                    {lead.stato}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 text-text-faint text-xs hidden lg:table-cell">
-                  {formatDate(lead.created_at)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {lead.stato}
+              </Badge>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-text-muted bg-surface-2/50 p-2 rounded-lg">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
+                <span className="truncate">
+                  {lead.car ? `${lead.car.marca} ${lead.car.modello}` : "Interesse Generico"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-[10px] text-text-faint px-1">
+                <Badge variant="default" className="bg-white/5 border-transparent">{lead.tipo}</Badge>
+                <span>{formatDate(lead.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Lead Detail SlideOver */}
