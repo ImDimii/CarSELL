@@ -163,21 +163,21 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-faint" />
           <input
             type="text"
-            placeholder="Cerca..."
+            placeholder="Cerca per marca o modello..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-10 !py-2"
+            className="input-field pl-10 !py-2 w-full"
           />
         </div>
         <select
           value={filterStato}
           onChange={(e) => setFilterStato(e.target.value)}
-          className="input-field !w-auto !py-2"
+          className="input-field !w-full sm:!w-auto !py-2"
         >
           <option value="">Tutti gli stati</option>
           <option value="Disponibile">Disponibile</option>
@@ -186,13 +186,13 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
         </select>
       </div>
 
-      {/* Table */}
-      <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden sm:block surface-card rounded-xl overflow-hidden overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/[.08]">
               <th className="text-left px-4 py-3 text-text-muted font-medium">Auto</th>
-              <th className="text-left px-4 py-3 text-text-muted font-medium hidden sm:table-cell">Anno</th>
+              <th className="text-left px-4 py-3 text-text-muted font-medium hidden lg:table-cell">Anno</th>
               <th className="text-left px-4 py-3 text-text-muted font-medium">Prezzo</th>
               <th className="text-left px-4 py-3 text-text-muted font-medium hidden md:table-cell">Km</th>
               <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
@@ -218,7 +218,7 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-text-muted hidden sm:table-cell">{car.anno}</td>
+                <td className="px-4 py-3 text-text-muted hidden lg:table-cell">{car.anno}</td>
                 <td className="px-4 py-3 text-accent font-medium">{formatPrice(car.prezzo)}</td>
                 <td className="px-4 py-3 text-text-muted hidden md:table-cell">
                   {formatNumber(car.km)}
@@ -258,6 +258,66 @@ export default function InventarioClient({ initialCars }: InventarioClientProps)
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="sm:hidden space-y-4">
+        {filtered.map((car) => (
+          <div key={car.id} className="surface-card p-4 rounded-xl space-y-4">
+            <div className="flex gap-4">
+              <div className="relative w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={getCarImageUrl(car.foto)}
+                  alt={car.modello}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-bold text-text truncate">{car.marca} {car.modello}</p>
+                    <p className="text-xs text-text-muted">{car.anno} • {car.carburante}</p>
+                  </div>
+                  <button onClick={() => handleStatusToggle(car)}>
+                    <Badge
+                      variant={
+                        car.stato === "Disponibile"
+                          ? "success"
+                          : car.stato === "Riservata"
+                          ? "warning"
+                          : "danger"
+                      }
+                    >
+                      {car.stato}
+                    </Badge>
+                  </button>
+                </div>
+                <p className="text-accent font-semibold mt-1">{formatPrice(car.prezzo)}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+              <span className="text-xs text-text-faint">{formatNumber(car.km)} km</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openEdit(car)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-2 text-text-muted text-xs font-medium"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Modifica
+                </button>
+                <button
+                  onClick={() => handleDelete(car.id)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-medium"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Elimina
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Car Form SlideOver */}

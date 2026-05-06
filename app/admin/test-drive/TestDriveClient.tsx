@@ -220,58 +220,93 @@ export default function TestDriveClient({ initialTestDrives, cars }: TestDriveCl
         </>
       ) : (
         /* List View */
-        <div className="surface-card rounded-xl overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[.08]">
-                <th className="text-left px-4 py-3 text-text-muted font-medium">Data & Ora</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium">Cliente</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium">Auto</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[.08]">
-              {testDrives.map((td) => (
-                <tr
-                  key={td.id}
-                  onClick={() => { setSelectedTD(td); setSlideOpen(true); }}
-                  className="hover:bg-surface-2 transition-colors cursor-pointer"
-                >
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-text">{formatDate(td.data_appuntamento)}</p>
-                    <p className="text-xs text-text-faint">{formatTime(td.ora_inizio)} - {formatTime(td.ora_fine)}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-text">{td.nome_cliente}</p>
-                    <p className="text-xs text-text-faint">{td.telefono_cliente || td.email_cliente}</p>
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">
-                    {td.car ? `${td.car.marca} ${td.car.modello}` : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      variant={
-                        td.stato === "Confermato"
-                          ? "accent"
-                          : td.stato === "Completato"
-                          ? "success"
-                          : "danger"
-                      }
-                    >
-                      {td.stato}
-                    </Badge>
-                  </td>
+        <div className="space-y-4">
+          {/* Desktop View */}
+          <div className="hidden sm:block surface-card rounded-xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[.08]">
+                  <th className="text-left px-4 py-3 text-text-muted font-medium">Data & Ora</th>
+                  <th className="text-left px-4 py-3 text-text-muted font-medium">Cliente</th>
+                  <th className="text-left px-4 py-3 text-text-muted font-medium">Auto</th>
+                  <th className="text-left px-4 py-3 text-text-muted font-medium">Stato</th>
                 </tr>
-              ))}
-              {testDrives.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-text-muted">
-                    Nessun test drive registrato.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/[.08]">
+                {testDrives.map((td) => (
+                  <tr
+                    key={td.id}
+                    onClick={() => { setSelectedTD(td); setSlideOpen(true); }}
+                    className="hover:bg-surface-2 transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-text">{formatDate(td.data_appuntamento)}</p>
+                      <p className="text-xs text-text-faint">{formatTime(td.ora_inizio)} - {formatTime(td.ora_fine)}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-text">{td.nome_cliente}</p>
+                      <p className="text-xs text-text-faint">{td.telefono_cliente || td.email_cliente}</p>
+                    </td>
+                    <td className="px-4 py-3 text-text-muted">
+                      {td.car ? `${td.car.marca} ${td.car.modello}` : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge
+                        variant={
+                          td.stato === "Confermato"
+                            ? "accent"
+                            : td.stato === "Completato"
+                            ? "success"
+                            : "danger"
+                        }
+                      >
+                        {td.stato}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile View */}
+          <div className="sm:hidden space-y-3">
+            {testDrives.map((td) => (
+              <div
+                key={td.id}
+                onClick={() => { setSelectedTD(td); setSlideOpen(true); }}
+                className="surface-card p-4 rounded-xl space-y-3 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-bold text-text">{td.nome_cliente}</p>
+                    <p className="text-xs text-text-muted">{formatDate(td.data_appuntamento)} • {formatTime(td.ora_inizio)}</p>
+                  </div>
+                  <Badge
+                    variant={
+                      td.stato === "Confermato"
+                        ? "accent"
+                        : td.stato === "Completato"
+                        ? "success"
+                        : "danger"
+                    }
+                  >
+                    {td.stato}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-text-muted">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                  {td.car ? `${td.car.marca} ${td.car.modello}` : "Auto non specificata"}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {testDrives.length === 0 && (
+            <div className="surface-card p-8 rounded-xl text-center text-text-muted">
+              Nessun test drive registrato.
+            </div>
+          )}
         </div>
       )}
 
