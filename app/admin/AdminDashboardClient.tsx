@@ -57,10 +57,10 @@ export default function AdminDashboardClient({
 
       {/* Recent leads */}
       <div className="surface-card rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[.08]">
+        <div className="px-5 py-4">
           <h2 className="text-lg font-semibold text-text">Lead Recenti</h2>
         </div>
-        <div className="divide-y divide-white/8">
+        <div className="space-y-1 pb-4">
           {recentLeads.length === 0 ? (
             <div className="px-5 py-8 text-center text-text-muted text-sm">
               Nessun lead recente
